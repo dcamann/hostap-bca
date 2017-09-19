@@ -620,6 +620,13 @@ void hostapd_config_free_bss(struct hostapd_bss_config *conf)
 
 	hostapd_config_free_fils_realms(conf);
 
+	os_free(conf->eap_bca_auth_private_key);
+	// os_free(conf->eap_bca_auth_key_sign);
+	// os_free(conf->eap_bca_ca_public_key);
+	os_free(conf->eap_bca_eth_ipc_file_path);
+	os_free(conf->eap_bca_eth_auth_address);
+	os_free(conf->eap_bca_eth_auth_passphrase);
+
 	os_free(conf);
 }
 

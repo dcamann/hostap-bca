@@ -1,0 +1,65 @@
+#! /usr/local/bin/node
+
+var crypto = require('crypto');
+var EC = require('elliptic').ec;
+var ec = new EC('p256');
+
+
+var genPeerParams = function() {
+	var peerObj = {};
+	var peerKey = ec.genKeyPair();
+	
+	var privKeyHex = peerKey.getPrivate().toBuffer().toString('hex');
+	while (privKeyHex.length < 32) {
+		privKeyHex = '0' + privKeyHex;
+	}
+	peerObj.privateKey = "0x" + privKeyHex;
+	
+	var pubKeyXHex = peerKey.getPublic().getX().toBuffer().toString('hex');
+	while (pubKeyXHex.length < 32) {
+		pubKeyXHex = '0' + pubKeyXHex;
+	}
+	var pubKeyYHex = peerKey.getPublic().getY().toBuffer().toString('hex');
+	while (pubKeyYHex.length < 32) {
+		pubKeyYHex = '0' + pubKeyYHex;
+	}
+	peerObj.publicKey  = "0x" + pubKeyXHex + pubKeyYHex;
+	
+	var keyHashHex = crypto.createHash('sha256').update(pubKeyXHex + pubKeyYHex, 'hex').digest('hex');
+	while (keyHashHex.length < 32) {
+		keyHashHex = '0' + keyHashHex;
+	}
+	peerObj.keyHash  = "0x" + keyHashHex;
+	
+	return peerObj;
+};
+
+var params = genPeerParams();
+
+if (process.argv[2] == null) {
+	console.log(params);
+	process.exit(0);
+}
+
+
+
+
+var chKeyHash = process.argv[2];
+
+if (chKeyHash.length != 66) {
+	console.error("Error: caKeyHash has not 32 bytes length");
+	process.exit(1);
+}
+
+console.log("peerKeyHash = " + params.keyHash);
+
+
+console.log("\nwpa_supplicant.conf part:");
+console.log("network={\n" +
+			"  ssid=\"WIFI-NAME\"\n" +
+			"  key_mgmt=WPA-EAP\n" +
+			"  eap=BCA\n" +
+			"  identity=\"BC_NETWORK_ID\"\n" +
+			"  password=" + params.privateKey.slice(2) + chKeyHash.slice(2) + "\n" +
+			"}");
+

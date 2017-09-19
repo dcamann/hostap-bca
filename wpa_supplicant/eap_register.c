@@ -147,6 +147,11 @@ int eap_register_methods(void)
 		ret = eap_peer_eke_register();
 #endif /* EAP_EKE */
 
+#ifdef EAP_BCA
+	if (ret == 0)
+		ret = eap_peer_bca_register();
+#endif /* EAP_BCA */
+
 #ifdef EAP_SERVER_IDENTITY
 	if (ret == 0)
 		ret = eap_server_identity_register();
@@ -256,6 +261,12 @@ int eap_register_methods(void)
 	if (ret == 0)
 		ret = eap_server_pwd_register();
 #endif /* EAP_SERVER_PWD */
+
+
+#ifdef EAP_SERVER_BCA
+	if (ret == 0)
+		ret = eap_server_bca_register();
+#endif /* EAP_SERVER_BCA */
 
 	return ret;
 }

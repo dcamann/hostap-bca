@@ -1,0 +1,80 @@
+#! /usr/local/bin/node
+
+var crypto = require('crypto');
+var EC = require('elliptic').ec;
+var ec = new EC('p256');
+
+
+var genAuthenticatorParams = function(caPrivateKey, ethAddressHex) {
+	var authObj = {};
+	var authKey = ec.genKeyPair();
+	var caECKey = ec.keyFromPrivate(caPrivateKey);
+	
+	var privKeyHex = authKey.getPrivate().toBuffer().toString('hex');
+	while (privKeyHex.length < 32) {
+		privKeyHex = '0' + privKeyHex;
+	}
+	authObj.privateKey = "0x" + privKeyHex;
+	
+	var pubKeyXHex = authKey.getPublic().getX().toBuffer().toString('hex');
+	while (pubKeyXHex.length < 32) {
+		pubKeyXHex = '0' + pubKeyXHex;
+	}
+	var pubKeyYHex = authKey.getPublic().getY().toBuffer().toString('hex');
+	while (pubKeyYHex.length < 32) {
+		pubKeyYHex = '0' + pubKeyYHex;
+	}
+	authObj.publicKey  = "0x" + pubKeyXHex + pubKeyYHex;
+	
+	var keyHashHex = crypto.createHash('sha256').update(pubKeyXHex + pubKeyYHex, 'hex').digest('hex');
+	while (keyHashHex.length < 32) {
+		keyHashHex = '0' + keyHashHex;
+	}
+	authObj.keyHash  = "0x" + keyHashHex;
+	
+	var keySignObj = caECKey.sign(keyHashHex, 'hex');
+	var keySignRHex = keySignObj.r.toBuffer().toString('hex');
+	while (keySignRHex.length < 32) {
+		keySignRHex = '0' + keySignRHex;
+	}
+	var keySignSHex = keySignObj.s.toBuffer().toString('hex');
+	while (keySignSHex.length < 32) {
+		keySignSHex = '0' + keySignSHex;
+	}
+	authObj.keySign = "0x" + keySignRHex + keySignSHex;
+	
+	if (ethAddressHex != null)
+		authObj.ethAddress = "0x" + ethAddressHex;
+	
+	return authObj;
+};
+
+if (process.argv.length < 6) {
+	console.error("ERROR: bad arguments");
+	console.log("call:");
+	console.log("createAuthenticator <caPrivateKey> <contractPSK> <contractAddress> <authEthAddress>");
+	process.exit(1);
+}
+
+var caPrivateKey    = process.argv[2].slice(2);
+var contractPSK     = process.argv[3].slice(2);
+var contractAddress = process.argv[4].slice(2);
+var authEthAddress  = process.argv[5].slice(2);
+
+var params = genAuthenticatorParams(caPrivateKey, authEthAddress);
+
+console.log(params);
+
+
+console.log("\n\nhostapd.conf part:");
+console.log("eap_bca_auth_private_key=" + params.privateKey.slice(2) + "\n" +
+			"eap_bca_eth_ipc_file_path=/home/pi/.ethereum/testnet/geth.ipc\n" +
+			"eap_bca_eth_auth_address=" + authEthAddress + "\n" +
+			"eap_bca_eth_auth_passphrase=\"\"\n");
+
+
+console.log("\nhostapd.eap_user part:");
+console.log("\"BC_NETWORK_ID\"\tBCA\t" + contractAddress + contractPSK);
+
+
+

@@ -621,6 +621,15 @@ struct hostapd_bss_config {
 	int multicast_to_unicast;
 
 	int broadcast_deauth;
+	
+	
+	/* BCA Config */
+	u8 *eap_bca_auth_private_key;
+	// u8 *eap_bca_auth_key_sign;
+	// u8 *eap_bca_ca_public_key;
+	char *eap_bca_eth_ipc_file_path;
+	u8 *eap_bca_eth_auth_address;
+	char *eap_bca_eth_auth_passphrase;
 };
 
 /**

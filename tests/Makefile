@@ -1,6 +1,7 @@
 TESTS=test-base64 test-md4 test-milenage \
 	test-rsa-sig-ver \
 	test-sha1 \
+	test-bca \
 	test-sha256 test-aes test-asn1 test-x509 test-x509v3 test-list test-rc4
 
 all: $(TESTS)
@@ -31,6 +32,13 @@ LLIBS = -Wl,--start-group $(DLIBS) -Wl,--end-group $(SLIBS)
 # glibc < 2.17 needs -lrt for clock_gettime()
 LLIBS += -lrt
 
+
+# for test-bca
+LIBS += -lssl
+LIBS += -lcrypto
+LIBS += -lm
+
+
 ../src/utils/libutils.a:
 	$(MAKE) -C ../src/utils
 
@@ -39,6 +47,9 @@ LLIBS += -lrt
 
 ../src/tls/libtls.a:
 	$(MAKE) -C ../src/tls
+	
+../src/eap_common/eap_bca_common.o:
+	$(MAKE) -C ../src/eap_common
 
 
 test-aes: test-aes.o $(LIBS)
@@ -80,6 +91,9 @@ test-x509: test-x509.o $(LIBS)
 test-x509v3: test-x509v3.o $(LIBS)
 	$(LDO) $(LDFLAGS) -o $@ $< $(LLIBS)
 
+test-bca: test-bca.o $(LIBS) ../src/eap_common/eap_bca_common.o
+	$(LDO) $(LDFLAGS) -o $@ $^ $(LLIBS)
+
 
 run-tests: $(TESTS)
 	./test-aes
@@ -89,6 +103,7 @@ run-tests: $(TESTS)
 	./test-rsa-sig-ver
 	./test-sha1
 	./test-sha256
+	./test-bca
 	@echo
 	@echo All tests completed successfully.
 

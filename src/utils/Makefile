@@ -23,7 +23,8 @@ LIB_OBJS= \
 	trace.o \
 	uuid.o \
 	wpa_debug.o \
-	wpabuf.o
+	wpabuf.o \
+	cJSON.o
 
 # Pick correct OS wrapper implementation
 LIB_OBJS += os_unix.o

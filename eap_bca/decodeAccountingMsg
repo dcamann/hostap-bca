@@ -1,0 +1,74 @@
+#! /usr/local/bin/node
+
+var crypto = require('crypto');
+var EC = require('elliptic').ec;
+var ec = new EC('p256');
+
+
+
+
+if (process.argv.length < 1) {
+	console.error("ERROR: bad arguments");
+	console.log("call:");
+	console.log("decodeAccountingMsg <decodedMsg>");
+	process.exit(1);
+}
+
+var decodedMsg = process.argv[2].slice(2);
+
+
+const BC_ACCOUNTING_MSG_TYPE_DISCONNECT = 1;
+
+var decodeDisconnectMsg = function(decmsg) {
+	var dmsgp = decmsg;
+	
+	// read: macAddress      [6]byte
+	console.log("macAddress: " + dmsgp.slice(0, 12));
+	dmsgp = dmsgp.slice(12);
+	
+	// read: rxTxBytes       uint64
+	var rxTxBytes = (new Buffer(dmsgp.slice(8, 16), 'hex')).readUInt32BE();
+	console.log("rxTxBytes: " + rxTxBytes);
+	dmsgp = dmsgp.slice(16);
+	
+	// read: rxPackets       uint32
+	var rxPackets = (new Buffer(dmsgp.slice(0, 8), 'hex')).readUInt32BE();
+	console.log("rxPackets: " + rxPackets);
+	dmsgp = dmsgp.slice(8);
+	
+	// read: txPackets       uint32
+	var txPackets = (new Buffer(dmsgp.slice(0, 8), 'hex')).readUInt32BE();
+	console.log("txPackets: " + txPackets);
+	dmsgp = dmsgp.slice(8);
+};
+
+
+var decodeMainMsg = function(decmsg) {
+	var dmsgp = decmsg;
+	
+	// read: timestamp       uint32
+	var timestamp = (new Buffer(dmsgp.slice(0, 8), 'hex')).readUInt32BE();
+	var date = new Date(timestamp * 1000);
+	console.log("timestamp: " + date.toLocaleDateString() + " " + date.toLocaleTimeString());
+	dmsgp = dmsgp.slice(8);
+	
+	// read: authKeyHashPart [4]byte
+	console.log("authKeyHashPart: " + dmsgp.slice(0, 8));
+	dmsgp = dmsgp.slice(8);
+	
+	// read: messageType     uint8
+	var messageType = (new Buffer(dmsgp.slice(0, 2), 'hex')).readUInt8();
+	console.log("messageType: " + messageType);
+	dmsgp = dmsgp.slice(2);
+	
+	switch (messageType) {
+		case BC_ACCOUNTING_MSG_TYPE_DISCONNECT:
+			decodeDisconnectMsg(dmsgp);
+			break;
+		default:
+			console.error("Error: messageType unknown");
+	}
+};
+
+decodeMainMsg(decodedMsg);
+

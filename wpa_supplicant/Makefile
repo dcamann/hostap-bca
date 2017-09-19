@@ -710,6 +710,17 @@ NEED_SHA256=y
 NEED_AES_CBC=y
 endif
 
+ifdef CONFIG_EAP_BCA
+CFLAGS += -DEAP_BCA
+OBJS += ../src/utils/cJSON.o
+OBJS += ../src/eap_peer/eap_bca.o
+OBJS += ../src/eap_common/eap_bca_common.o
+OBJS += ../src/crypto/aes-gcm.o
+LIBS += -lm
+NEED_AES=y
+NEED_SHA256=y
+endif
+
 ifdef CONFIG_WPS
 # EAP-WSC
 CFLAGS += -DCONFIG_WPS -DEAP_WSC

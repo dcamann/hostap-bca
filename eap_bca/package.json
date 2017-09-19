@@ -1,0 +1,14 @@
+{
+  "name": "EthereumTools",
+  "version": "1.0.0",
+  "description": "",
+  "main": "tools.js",
+  "keywords": [
+    "ethereum"
+  ],
+  "author": "David",
+  "dependencies": {
+    "web3": "*",
+	"ethereumjs-util": "*"
+  }
+}
