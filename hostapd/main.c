@@ -29,6 +29,8 @@
 #include "eap_register.h"
 #include "ctrl_iface.h"
 
+#include "eap_server/eap_bca_common.h"
+
 
 struct hapd_global {
 	void **drv_priv;
@@ -393,6 +395,10 @@ static void hostapd_global_deinit(const char *pid_file, int eloop_initialized)
 #ifdef EAP_SERVER_TNC
 	tncs_global_deinit();
 #endif /* EAP_SERVER_TNC */
+
+#ifdef EAP_SERVER_BCA
+	bca_global_deinit();
+#endif /* EAP_SERVER_BCA */
 
 	random_deinit();
 

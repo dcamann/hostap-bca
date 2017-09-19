@@ -50,6 +50,8 @@
 #include "fils_hlp.h"
 #include "acs.h"
 
+#include "eap_server/eap_bca_common.h"
+
 
 static int hostapd_flush_old_stations(struct hostapd_data *hapd, u16 reason);
 static int hostapd_setup_encryption(char *iface, struct hostapd_data *hapd);
@@ -1166,6 +1168,13 @@ static int hostapd_setup_bss(struct hostapd_data *hapd, int first)
 
 	if (hapd->driver && hapd->driver->set_operstate)
 		hapd->driver->set_operstate(hapd->drv_priv, 1);
+
+#ifdef EAP_SERVER_BCA
+	if (bca_global_init(hapd)) {
+		wpa_printf(MSG_ERROR, "Failed to initialize BCA");
+		return -1;
+	}
+#endif /* EAP_SERVER_BCA */
 
 	return 0;
 }

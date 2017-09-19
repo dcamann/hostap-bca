@@ -23,6 +23,7 @@ LIB_OBJS= \
 	eap_sake_common.o \
 	eap_sim_common.o \
 	eap_wsc_common.o \
+	eap_bca_common.o \
 	ikev2_common.o
 
 libeap_common.a: $(LIB_OBJS)

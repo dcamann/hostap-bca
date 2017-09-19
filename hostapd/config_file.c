@@ -24,6 +24,11 @@
 #include "config_file.h"
 
 
+#ifdef EAP_SERVER_BCA
+#include "eap_common/eap_bca_common.h"
+#endif /* EAP_SERVER_BCA */
+
+
 #ifndef CONFIG_NO_RADIUS
 #ifdef EAP_SERVER
 static struct hostapd_radius_attr *
@@ -2316,6 +2321,46 @@ static int hostapd_config_fill(struct hostapd_config *conf,
 #endif /* EAP_SERVER_PWD */
 	} else if (os_strcmp(buf, "eap_server_erp") == 0) {
 		bss->eap_server_erp = atoi(pos);
+#ifdef EAP_SERVER_BCA
+	} else if (os_strcmp(buf, "eap_bca_auth_private_key") == 0) {
+		os_free(bss->eap_bca_auth_private_key);
+		
+		bss->eap_bca_auth_private_key = os_zalloc(BCA_ECDSA_KEY_LENGTH);
+		if (bss->eap_bca_auth_private_key == NULL)
+			return 1;
+		if (hexstr2bin(pos, bss->eap_bca_auth_private_key, BCA_ECDSA_KEY_LENGTH) || pos[BCA_ECDSA_KEY_LENGTH * 2] != '\0') {
+			wpa_printf(MSG_ERROR, "Line %d: Invalid ecdsa private key (32 byte, hex encoded) '%s'.", line, pos);
+			return 1;
+		}
+	} else if (os_strcmp(buf, "eap_bca_eth_auth_address") == 0) {
+		os_free(bss->eap_bca_eth_auth_address);
+		
+		bss->eap_bca_eth_auth_address = os_zalloc(BCA_ETH_ADDR_LENGTH);
+		if (bss->eap_bca_eth_auth_address == NULL)
+			return 1;
+		if (hexstr2bin(pos, bss->eap_bca_eth_auth_address, BCA_ETH_ADDR_LENGTH) || pos[BCA_ETH_ADDR_LENGTH * 2] != '\0') {
+			wpa_printf(MSG_ERROR, "Line %d: Invalid ethereum address (20 byte, hex encoded) '%s'.", line, pos);
+			return 1;
+		}
+	} else if (os_strcmp(buf, "eap_bca_eth_auth_passphrase") == 0) {
+		os_free(bss->eap_bca_eth_auth_passphrase);
+		size_t slen;
+		char *str = wpa_config_parse_string(pos, &slen);
+		if (str == NULL) {
+			wpa_printf(MSG_ERROR, "Line %d: invalid eap_bca_eth_auth_passphrase '%s'", line, pos);
+			os_free(str);
+			return 1;
+		}
+		bss->eap_bca_eth_auth_passphrase = os_strdup(str);
+		os_free(str);
+	} else if (os_strcmp(buf, "eap_bca_eth_ipc_file_path") == 0) {
+		os_free(bss->eap_bca_eth_ipc_file_path);
+		bss->eap_bca_eth_ipc_file_path = os_strdup(pos);
+		if (!bss->eap_bca_eth_ipc_file_path) {
+			wpa_printf(MSG_ERROR, "Line %d: allocation failed", line);
+			return 1;
+		}
+#endif /* EAP_SERVER_BCA */
 #endif /* EAP_SERVER */
 	} else if (os_strcmp(buf, "eap_message") == 0) {
 		char *term;

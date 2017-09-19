@@ -21,6 +21,8 @@
 #include "ap_drv_ops.h"
 #include "accounting.h"
 
+#include "bc_accounting.h"
+
 
 /* Default interval in seconds for polling TX/RX octets from the driver if
  * STA is not using interim accounting. This detects wrap arounds for
@@ -225,6 +227,8 @@ void accounting_sta_start(struct hostapd_data *hapd, struct sta_info *sta)
 	struct radius_msg *msg;
 	int interval;
 
+	bc_accounting_sta_start(hapd, sta);
+
 	if (sta->acct_session_started)
 		return;
 
@@ -377,6 +381,8 @@ static void accounting_sta_interim(struct hostapd_data *hapd,
  */
 void accounting_sta_stop(struct hostapd_data *hapd, struct sta_info *sta)
 {
+	bc_accounting_sta_stop(hapd, sta);
+	
 	if (sta->acct_session_started) {
 		accounting_sta_report(hapd, sta, 1);
 		eloop_cancel_timeout(accounting_interim_update, hapd, sta);

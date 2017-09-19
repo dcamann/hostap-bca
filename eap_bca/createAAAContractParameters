@@ -1,0 +1,46 @@
+#! /usr/local/bin/node
+
+var crypto = require('crypto');
+var EC = require('elliptic').ec;
+var ec = new EC('p256');
+
+var newAAAContractParams = function() {
+	// PSK gen.
+	var pskHex = crypto.randomBytes(16).toString('hex')
+	while (pskHex.length < 16) {
+		pskHex = '0' + pskHex;
+	}
+	console.log("var psk            = '0x" + pskHex + "';");
+	
+	
+	// ECDSA-Key gen.
+	var ecKey = ec.genKeyPair();
+	
+	var privKeyHex = ecKey.getPrivate().toBuffer().toString('hex');
+	while (privKeyHex.length < 32) {
+		privKeyHex = '0' + privKeyHex;
+	}
+	console.log("var caPrivateKey   = '0x" + privKeyHex + "';");
+	
+	var pubKeyXHex = ecKey.getPublic().getX().toBuffer().toString('hex');
+	while (pubKeyXHex.length < 32) {
+		pubKeyXHex = '0' + pubKeyXHex;
+	}
+	var pubKeyYHex = ecKey.getPublic().getY().toBuffer().toString('hex');
+	while (pubKeyYHex.length < 32) {
+		pubKeyYHex = '0' + pubKeyYHex;
+	}
+	console.log("var caPubKey       = '0x" + pubKeyXHex + pubKeyYHex + "';");
+	
+	
+	// key hash gen.
+	var keyHashHex = crypto.createHash('sha256')
+					.update(pubKeyXHex + pubKeyYHex, 'hex')
+					.digest('hex');
+	while (keyHashHex.length < 32) {
+		keyHashHex = '0' + keyHashHex;
+	}
+	console.log("var caKeyHash      = '0x" + keyHashHex + "';");
+};
+
+newAAAContractParams();

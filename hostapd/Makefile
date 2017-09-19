@@ -194,6 +194,7 @@ ifdef CONFIG_NO_ACCOUNTING
 CFLAGS += -DCONFIG_NO_ACCOUNTING
 else
 OBJS += ../src/ap/accounting.o
+OBJS += ../src/ap/bc_accounting.o
 endif
 
 ifdef CONFIG_NO_VLAN
@@ -497,6 +498,20 @@ OBJS += ../src/eap_server/eap_server_eke.o ../src/eap_common/eap_eke_common.o
 NEED_DH_GROUPS=y
 NEED_DH_GROUPS_ALL=y
 endif
+
+
+ifdef CONFIG_EAP_BCA
+CFLAGS += -DEAP_SERVER_BCA
+OBJS += ../src/utils/cJSON.o
+OBJS += ../src/eap_server/eap_server_bca.o
+OBJS += ../src/eap_server/eap_server_bca_common.o
+OBJS += ../src/eap_common/eap_bca_common.o
+OBJS += ../src/crypto/aes-gcm.o
+LIBS += -lm
+NEED_AES=y
+NEED_SHA256=y
+endif
+
 
 ifdef CONFIG_EAP_VENDOR_TEST
 CFLAGS += -DEAP_SERVER_VENDOR_TEST

@@ -146,5 +146,11 @@ int eap_server_register_methods(void)
 		ret = eap_server_eke_register();
 #endif /* EAP_SERVER_EKE */
 
+
+#ifdef EAP_SERVER_BCA
+	if (ret == 0)
+		ret = eap_server_bca_register();
+#endif /* EAP_SERVER_BCA */
+
 	return ret;
 }

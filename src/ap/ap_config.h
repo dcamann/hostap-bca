@@ -644,6 +644,14 @@ struct hostapd_bss_config {
 	struct wpabuf *dpp_csign;
 	unsigned int dpp_csign_expiry;
 #endif /* CONFIG_DPP */
+	
+	/* BCA Config */
+	u8 *eap_bca_auth_private_key;
+	// u8 *eap_bca_auth_key_sign;
+	// u8 *eap_bca_ca_public_key;
+	char *eap_bca_eth_ipc_file_path;
+	u8 *eap_bca_eth_auth_address;
+	char *eap_bca_eth_auth_passphrase;
 };
 
 /**

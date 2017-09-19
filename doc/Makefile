@@ -40,3 +40,18 @@ clean:
 	rm -f doxygen.warnings
 	rm -rf html latex
 	rm -f wpa_supplicant-devel.pdf
+
+
+
+###################### only for EAP-BC documentation ###########################
+
+eapbc: eap-bc-docs-pics
+
+%.pdf: %.fig
+	fig2dev -L pdf $*.fig $*.pdf
+
+%.pdf: %.dot
+	dot $*.dot -Tpdf -o $*.pdf
+
+eap-bc-docs-pics: wpa_supplicant.pdf hostapd.pdf p2p_sm.pdf p2p_arch.pdf p2p_arch2.pdf
+
